@@ -1,6 +1,12 @@
 from db import create_connection
-from crudoperations import manage_users, manage_customers, manage_shipments, manage_packages, manage_payments
-from menus import table_list  # Ensure you import table_list
+from crudoperations import (
+    manage_users, manage_customers, manage_shipments, manage_packages, manage_payments,
+    manage_addresses, manage_delivery_attempts, manage_package_dimension,
+)
+
+#  manage_package_status,
+#     manage_pickup_requests, manage_user_role
+from menus import table_list
 
 def start_application():
     conn = create_connection()
@@ -22,6 +28,18 @@ def start_application():
         elif table_choice == "5":
             manage_payments(conn)
         elif table_choice == "6":
+            manage_addresses(conn)
+        elif table_choice == "7":
+            manage_delivery_attempts(conn)
+        elif table_choice == "8":
+            manage_package_dimension(conn)
+        elif table_choice == "9":
+            manage_package_status(conn)
+        elif table_choice == "10":
+            manage_pickup_requests(conn)
+        elif table_choice == "11":
+            manage_user_role(conn)
+        elif table_choice == "12":
             print("👋 Exiting... Have a great day!")
             conn.close()  # Close the database connection before exiting
             break
