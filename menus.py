@@ -12,20 +12,26 @@ def crud_operation_menu(entity_name):
 
 def table_list():
     print("\n" + "=" * 50)
-    print(f"\033[1m📦 WELCOME TO UPS MANAGEMENT SYSTEM 📦\033[0m".center(50))  # Bold subheading
+    print(f"\033[1m📦 WELCOME TO UPS MANAGEMENT SYSTEM 📦\033[0m".center(50))
     print("Efficiently manage your users, customers, shipments, packages, and payments.".center(50))
     print("Seamlessly handle your logistics with our intuitive interface.".center(50))
     print("=" * 50)
-    print("\n\033[1m🗂️ AVAILABLE TABLES TO MANAGE\033[0m".center(50))  # Bold subheading
+    print("\n\033[1m🗂️ AVAILABLE TABLES TO MANAGE\033[0m".center(50))
     print("-" * 50)
     print("1. 🧑‍💻 Manage Users")
     print("2. 👥 Manage Customers")
     print("3. 🚚 Manage Shipments")
     print("4. 📦 Manage Packages")
     print("5. 💳 Manage Payments")
-    print("6. ❌ Exit Application")
+    print("6. 🏠 Manage Addresses")
+    print("7. 🕵️‍♂️ Manage Delivery Attempts")
+    print("8. 📏 Manage Package Dimensions")
+    print("9. 📄 Manage Package Status")
+    print("10. 📋 Manage Pickup Requests")
+    print("11. 🔒 Manage User Roles")
+    print("12. ❌ Exit Application")
     print("=" * 50)
-    return input("👉 Select a Table to Manage (1-6): ").strip()
+    return input("👉 Select a Table to Manage (1-12): ").strip()
 
 def display_message(msg):
     print("\n" + "=" * 50)
