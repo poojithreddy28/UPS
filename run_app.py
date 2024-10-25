@@ -5,8 +5,7 @@ from crudoperations import (
     manage_pickup_requests,manage_user_role,
 )
 
-#  manage_package_status,
-#     manage_pickup_requests, manage_user_role
+
 from menus import table_list
 
 def start_application():
