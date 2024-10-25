@@ -1,6 +1,7 @@
 from menus import crud_operation_menu, table_list, display_message
 from db import execute_query, check_record_existance
 import re
+import datetime
 
 
 def validate_email(email):
@@ -538,15 +539,393 @@ def manage_package_dimension(conn):
 
 
 def manage_package_status(conn):
+    valid_status_types = {"Shipped", "Pending", "In Transit", "Delivered", "Cancelled"}
 
-    pass
+    while True:
+        display_message("PACKAGE STATUS MANAGEMENT MENU")
+        choice = crud_operation_menu("Package Status")
+
+        if choice == "1":
+            # Add New Status
+            package_id = input("Enter Package ID: ").strip()
+            
+            # Check if package_id exists in Packages table
+            if not check_record_existance("Packages", "package_id", package_id, conn):
+                print("\n" + "=" * 50)
+                print("⚠️ Package ID does not exist. Please enter a valid Package ID.".center(50))
+                print("=" * 50)
+                continue
+
+            status_type = input("Enter Status Type: ").strip()
+            
+            # Validate status_type
+            if status_type not in valid_status_types:
+                print("\n" + "=" * 50)
+                print("⚠️ Invalid status type. Please enter one of the following: Shipped, Pending, In Transit, Delivered, Cancelled.".center(50))
+                print("=" * 50)
+                continue
+
+            query = """
+            INSERT INTO PackageStatus (package_id, status_type)
+            VALUES (%s, %s)
+            """
+            
+            try:
+                execute_query(conn, query, (package_id, status_type))
+                print("\n" + "=" * 50)
+                print("✅ Package status added successfully.".center(50))
+                print("=" * 50)
+            except Exception as e:
+                print("\n" + "=" * 50)
+                print(f"❌ Error adding package status: {str(e)}".center(50))
+                print("=" * 50)
+
+        elif choice == "2":
+            # Read Status History
+            try:
+                package_id = input("Enter Package ID to view status history: ").strip()
+                query = "SELECT * FROM PackageStatus WHERE package_id = %s ORDER BY status_timestamp"
+                results = execute_query(conn, query, (package_id,), select=True)
+                
+                if results:
+                    print("\n" + "=" * 50)
+                    print("📄 PACKAGE STATUS HISTORY".center(50))
+                    print("-" * 50)
+                    for row in results:
+                        print(f"Status ID: {row[0]}")
+                        print(f"Package ID: {row[1]}")
+                        print(f"Status Type: {row[2]}")
+                        print(f"Timestamp: {row[3]}")
+                        print("-" * 50)
+                else:
+                    print("\n" + "=" * 50)
+                    print("⚠️ No matching records found.".center(50))
+                    print("=" * 50)
+            except Exception as e:
+                print("\n" + "=" * 50)
+                print(f"❌ Error reading package status history: {str(e)}".center(50))
+                print("=" * 50)
+
+        elif choice == "3":
+            # Update Status Entry
+            try:
+                status_id = input("Enter Status ID to update: ").strip()
+                
+                if not check_record_existance("PackageStatus", "status_id", status_id, conn):
+                    print("\n" + "=" * 50)
+                    print("⚠️ No matching record found.".center(50))
+                    print("=" * 50)
+                    continue
+
+                new_status_type = input("Enter New Status Type: ").strip()
+                
+                # Validate new_status_type
+                if new_status_type not in valid_status_types:
+                    print("\n" + "=" * 50)
+                    print("⚠️ Invalid status type. Please enter one of the following: Shipped, Pending, In Transit, Delivered, Cancelled.".center(50))
+                    print("=" * 50)
+                    continue
+
+                query = """
+                UPDATE PackageStatus
+                SET status_type = %s
+                WHERE status_id = %s
+                """
+                
+                execute_query(conn, query, (new_status_type, status_id))
+                
+                print("\n" + "=" * 50)
+                print("✅ Package status updated successfully.".center(50))
+                print("=" * 50)
+            except Exception as e:
+                print("\n" + "=" * 50)
+                print(f"❌ Error updating package status: {str(e)}".center(50))
+                print("=" * 50)
+
+        elif choice == "4":
+            # Delete Status Record
+            try:
+                status_id = input("Enter Status ID to delete: ").strip()
+                
+                if check_record_existance("PackageStatus", "status_id", status_id, conn):
+                    query = "DELETE FROM PackageStatus WHERE status_id = %s"
+                    execute_query(conn, query, (status_id,))
+                    
+                    print("\n" + "=" * 50)
+                    print("✅ Package status deleted successfully.".center(50))
+                    print("=" * 50)
+                else:
+                    print("\n" + "=" * 50)
+                    print("⚠️ No matching record found.".center(50))
+                    print("=" * 50)
+            except Exception as e:
+                print("\n" + "=" * 50)
+                print(f"❌ Error deleting package status: {str(e)}".center(50))
+                print("=" * 50)
+
+        elif choice == "5":
+            # Return to Main Menu
+            return table_list()
+
+        else:
+            print("\n" + "=" * 50)
+            print("⚠️ Invalid choice. Please try again.".center(50))
+            print("=" * 50)
+
+
+import datetime
+
+def validate_date(date_text):
+    """Validate date format (YYYY-MM-DD)."""
+    try:
+        datetime.datetime.strptime(date_text, '%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
 
 def manage_pickup_requests(conn):
+    while True:
+        display_message("PICKUP REQUEST MANAGEMENT MENU")
+        choice = crud_operation_menu("Pickup Requests")
 
-    pass
+        if choice == "1":
+            # Register Pickup Request
+            customer_id = input("Enter Customer ID: ").strip()
+            pickup_date = input("Enter Pickup Date (YYYY-MM-DD): ").strip()
+            pickup_status = input("Enter Pickup Status: ").strip()
+
+            # Validate existence of customer_id
+            if not check_record_existance("Customers", "customer_id", customer_id, conn):
+                print("\n" + "=" * 50)
+                print("⚠️ Customer ID does not exist. Please enter a valid Customer ID.".center(50))
+                print("=" * 50)
+                continue
+
+            # Validate date format
+            if not validate_date(pickup_date):
+                print("\n" + "=" * 50)
+                print("⚠️ Invalid date format. Please enter the date in YYYY-MM-DD format.".center(50))
+                print("=" * 50)
+                continue
+
+            query = """
+            INSERT INTO Pickup_Requests (customer_id, pickup_date, pickup_status)
+            VALUES (%s, %s, %s)
+            """
+            
+            try:
+                execute_query(conn, query, (customer_id, pickup_date, pickup_status))
+                print("\n" + "=" * 50)
+                print("✅ Pickup request registered successfully.".center(50))
+                print("=" * 50)
+            except Exception as e:
+                print("\n" + "=" * 50)
+                print(f"❌ Error registering pickup request: {str(e)}".center(50))
+                print("=" * 50)
+
+        elif choice == "2":
+            # View Pickup Records
+            try:
+                request_id = input("Enter Pickup Request ID to search: ").strip()
+                query = "SELECT * FROM Pickup_Requests WHERE request_id = %s"
+                
+                results = execute_query(conn, query, (request_id,), select=True)
+                
+                if results:
+                    print("\n" + "=" * 50)
+                    print("📋 PICKUP REQUEST DETAILS".center(50))
+                    print("-" * 50)
+                    for row in results:
+                        print(f"Request ID: {row[0]}")
+                        print(f"Customer ID: {row[1]}")
+                        print(f"Pickup Date: {row[2]}")
+                        print(f"Pickup Status: {row[3]}")
+                        print("-" * 50)
+                else:
+                    print("\n" + "=" * 50)
+                    print("⚠️ No matching record found.".center(50))
+                    print("=" * 50)
+            except Exception as e:
+                print("\n" + "=" * 50)
+                print(f"❌ Error viewing pickup records: {str(e)}".center(50))
+                print("=" * 50)
+
+        elif choice == "3":
+            # Edit Pickup Information
+            try:
+                request_id = input("Enter Pickup Request ID to update: ").strip()
+                
+                if not check_record_existance("Pickup_Requests", "request_id", request_id, conn):
+                    print("\n" + "=" * 50)
+                    print("⚠️ No matching record found.".center(50))
+                    print("=" * 50)
+                    continue
+
+                new_pickup_date = input("Enter New Pickup Date (YYYY-MM-DD): ").strip()
+                
+                # Validate new date format
+                if not validate_date(new_pickup_date):
+                    print("\n" + "=" * 50)
+                    print("⚠️ Invalid date format. Please enter the date in YYYY-MM-DD format.".center(50))
+                    print("=" * 50)
+                    continue
+
+                new_pickup_status = input("Enter New Pickup Status: ").strip()
+
+                query = """
+                UPDATE Pickup_Requests
+                SET pickup_date = %s, pickup_status = %s
+                WHERE request_id = %s
+                """
+                
+                execute_query(conn, query, (new_pickup_date, new_pickup_status, request_id))
+                
+                print("\n" + "=" * 50)
+                print("✅ Pickup information updated successfully.".center(50))
+                print("=" * 50)
+            except Exception as e:
+                print("\n" + "=" * 50)
+                print(f"❌ Error updating pickup information: {str(e)}".center(50))
+                print("=" * 50)
+
+        elif choice == "4":
+            # Delete Pickup Request
+            try:
+                request_id = input("Enter Pickup Request ID to delete: ").strip()
+                
+                if check_record_existance("Pickup_Requests", "request_id", request_id, conn):
+                    query = "DELETE FROM Pickup_Requests WHERE request_id = %s"
+                    
+                    execute_query(conn, query, (request_id,))
+                    
+                    print("\n" + "=" * 50)
+                    print("✅ Pickup request deleted successfully.".center(50))
+                    print("=" * 50)
+                else:
+                    print("\n" + "=" * 50)
+                    print("⚠️ No matching record found.".center(50))
+                    print("=" * 50)
+            except Exception as e:
+                print("\n" + "=" * 50)
+                print(f"❌ Error deleting pickup request: {str(e)}".center(50))
+                print("=" * 50)
+
+        elif choice == "5":
+            # Return to Main Menu
+            return table_list()
+
+        else:
+            print("\n" + "=" * 50)
+            print("⚠️ Invalid choice. Please try again.".center(50))
+            print("=" * 50)
+
+
 
 def manage_user_role(conn):
-    
-    pass
+    while True:
+        display_message("USER ROLES MANAGEMENT MENU")
+        choice = crud_operation_menu("User Roles")
 
+        if choice == "1":
+            # Add New Role
+            role_name = input("Enter Role Name: ").strip()
 
+            query = """
+            INSERT INTO user_role (role_name)
+            VALUES (%s)
+            """
+            
+            try:
+                execute_query(conn, query, (role_name,))
+                print("\n" + "=" * 50)
+                print("✅ Role added successfully.".center(50))
+                print("=" * 50)
+            except Exception as e:
+                print("\n" + "=" * 50)
+                print(f"❌ Error adding role: {str(e)}".center(50))
+                print("=" * 50)
+
+        elif choice == "2":
+            # View Role Records
+            try:
+                role_id = input("Enter Role ID to search: ").strip()
+                query = "SELECT * FROM user_role WHERE role_id = %s"
+                
+                results = execute_query(conn, query, (role_id,), select=True)
+                
+                if results:
+                    print("\n" + "=" * 50)
+                    print("🔒 ROLE DETAILS".center(50))
+                    print("-" * 50)
+                    for row in results:
+                        print(f"Role ID: {row[0]}")
+                        print(f"Role Name: {row[1]}")
+                        print("-" * 50)
+                else:
+                    print("\n" + "=" * 50)
+                    print("⚠️ No matching record found.".center(50))
+                    print("=" * 50)
+            except Exception as e:
+                print("\n" + "=" * 50)
+                print(f"❌ Error viewing role records: {str(e)}".center(50))
+                print("=" * 50)
+
+        elif choice == "3":
+            # Update Role Details
+            try:
+                role_id = input("Enter Role ID to update: ").strip()
+                
+                if not check_record_existance("user_role", "role_id", role_id, conn):
+                    print("\n" + "=" * 50)
+                    print("⚠️ No matching record found.".center(50))
+                    print("=" * 50)
+                    continue
+
+                new_role_name = input("Enter New Role Name: ").strip()
+
+                query = """
+                UPDATE user_role
+                SET role_name = %s
+                WHERE role_id = %s
+                """
+                
+                execute_query(conn, query, (new_role_name, role_id))
+                
+                print("\n" + "=" * 50)
+                print("✅ Role updated successfully.".center(50))
+                print("=" * 50)
+            except Exception as e:
+                print("\n" + "=" * 50)
+                print(f"❌ Error updating role details: {str(e)}".center(50))
+                print("=" * 50)
+
+        elif choice == "4":
+            # Delete Role
+            try:
+                role_id = input("Enter Role ID to delete: ").strip()
+                
+                if check_record_existance("user_role", "role_id", role_id, conn):
+                    query = "DELETE FROM user_role WHERE role_id = %s"
+                    
+                    execute_query(conn, query, (role_id,))
+                    
+                    print("\n" + "=" * 50)
+                    print("✅ Role deleted successfully.".center(50))
+                    print("=" * 50)
+                else:
+                    print("\n" + "=" * 50)
+                    print("⚠️ No matching record found.".center(50))
+                    print("=" * 50)
+            except Exception as e:
+                print("\n" + "=" * 50)
+                print(f"❌ Error deleting role: {str(e)}".center(50))
+                print("=" * 50)
+
+        elif choice == "5":
+            # Return to Main Menu
+            return table_list()
+
+        else:
+            print("\n" + "=" * 50)
+            print("⚠️ Invalid choice. Please try again.".center(50))
+            print("=" * 50)
