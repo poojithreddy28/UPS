@@ -6,9 +6,9 @@ def create_connection():
     try:
         connection = mysql.connector.connect(
             host='localhost',          # Update with your DB host
-            user='root',      # Update with your DB user
-            password='admin',  # Update with your DB password
-            database='ups_db'          # Make sure the database name matches
+            user='poojith',      # Update with your DB user
+            password='poojith',  # Update with your DB password
+            database='UPS_DB'          # Make sure the database name matches
         )
         if connection.is_connected():
             print("✅ Connected to the UPS_DB database.")
