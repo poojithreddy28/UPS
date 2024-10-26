@@ -1,5 +1,7 @@
-
 def table_list():
+    """
+    Display the main menu for the UPS Management System and prompt the user to select an option.
+    """
     print("\n" + "=" * 50)
     print(f"\033[1m📦 WELCOME TO UPS MANAGEMENT SYSTEM 📦\033[0m".center(50))
     print("Efficiently manage your users, customers, shipments, packages, and payments.".center(50))
@@ -24,8 +26,10 @@ def table_list():
 
 
 def crud_operation_menu(entity_name):
-    """Generate a CRUD operation menu based on the entity name."""
-    
+    """
+    Generate a CRUD operation menu based on the provided entity name and prompt the user to select an action.
+    """
+    # Users management options
     if entity_name == "Users":
         print("\n" + "=" * 50)
         print(f"\033[1m👤 USER MANAGEMENT OPERATIONS\033[0m".center(50))
@@ -38,6 +42,7 @@ def crud_operation_menu(entity_name):
         print("=" * 50)
         return input("👉 Choose an option (1-5): ").strip()
 
+    # Customers management options
     elif entity_name == "Customers":
         print("\n" + "=" * 50)
         print(f"\033[1m👥 CUSTOMER MANAGEMENT OPERATIONS\033[0m".center(50))
@@ -50,6 +55,7 @@ def crud_operation_menu(entity_name):
         print("=" * 50)
         return input("👉 Choose an option (1-5): ").strip()
 
+    # Shipments management options
     elif entity_name == "Shipments":
         print("\n" + "=" * 50)
         print(f"\033[1m🚚 SHIPMENT MANAGEMENT OPERATIONS\033[0m".center(50))
@@ -62,6 +68,7 @@ def crud_operation_menu(entity_name):
         print("=" * 50)
         return input("👉 Choose an option (1-5): ").strip()
 
+    # Packages management options
     elif entity_name == "Packages":
         print("\n" + "=" * 50)
         print(f"\033[1m📦 PACKAGE MANAGEMENT OPERATIONS\033[0m".center(50))
@@ -74,6 +81,7 @@ def crud_operation_menu(entity_name):
         print("=" * 50)
         return input("👉 Choose an option (1-5): ").strip()
 
+    # Payments management options
     elif entity_name == "Payments":
         print("\n" + "=" * 50)
         print(f"\033[1m💳 PAYMENT MANAGEMENT OPERATIONS\033[0m".center(50))
@@ -86,6 +94,7 @@ def crud_operation_menu(entity_name):
         print("=" * 50)
         return input("👉 Choose an option (1-5): ").strip()
 
+    # Addresses management options
     elif entity_name == "Addresses":
         print("\n" + "=" * 50)
         print(f"\033[1m🏠 ADDRESS MANAGEMENT OPERATIONS\033[0m".center(50))
@@ -98,6 +107,7 @@ def crud_operation_menu(entity_name):
         print("=" * 50)
         return input("👉 Choose an option (1-5): ").strip()
 
+    # Delivery Attempts management options
     elif entity_name == "Delivery Attempts":
         print("\n" + "=" * 50)
         print(f"\033[1m🕵️‍♂️ DELIVERY ATTEMPT MANAGEMENT\033[0m".center(50))
@@ -110,6 +120,7 @@ def crud_operation_menu(entity_name):
         print("=" * 50)
         return input("👉 Choose an option (1-5): ").strip()
 
+    # Package Dimensions management options
     elif entity_name == "Package Dimensions":
         print("\n" + "=" * 50)
         print(f"\033[1m📏 PACKAGE DIMENSIONS OPERATIONS\033[0m".center(50))
@@ -122,6 +133,7 @@ def crud_operation_menu(entity_name):
         print("=" * 50)
         return input("👉 Choose an option (1-5): ").strip()
 
+    # Package Status management options
     elif entity_name == "Package Status":
         print("\n" + "=" * 50)
         print(f"\033[1m📄 PACKAGE STATUS OPERATIONS\033[0m".center(50))
@@ -134,6 +146,7 @@ def crud_operation_menu(entity_name):
         print("=" * 50)
         return input("👉 Choose an option (1-5): ").strip()
 
+    # Pickup Requests management options
     elif entity_name == "Pickup Requests":
         print("\n" + "=" * 50)
         print(f"\033[1m📋 PICKUP REQUEST OPERATIONS\033[0m".center(50))
@@ -146,6 +159,7 @@ def crud_operation_menu(entity_name):
         print("=" * 50)
         return input("👉 Choose an option (1-5): ").strip()
 
+    # User Roles management options
     elif entity_name == "User Roles":
         print("\n" + "=" * 50)
         print(f"\033[1m🔒 USER ROLES MANAGEMENT\033[0m".center(50))
@@ -159,7 +173,7 @@ def crud_operation_menu(entity_name):
         return input("👉 Choose an option (1-5): ").strip()
 
     else:
-        # Fallback for unspecified entities
+        # Generic options for unspecified entities
         print("\n" + "=" * 50)
         print(f"\033[1m🔄 {entity_name.upper()} OPERATIONS\033[0m".center(50))
         print("-" * 50)
@@ -172,6 +186,9 @@ def crud_operation_menu(entity_name):
         return input("👉 Choose an option (1-5): ").strip()
 
 def display_message(msg):
+    """
+    Display a styled message for the user, typically for confirmations or alerts.
+    """
     print("\n" + "=" * 50)
     print(f"\033[1m🟢 {msg}\033[0m".center(50))  # Bold message
     print("=" * 50)
