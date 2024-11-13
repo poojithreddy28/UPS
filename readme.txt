@@ -46,3 +46,9 @@ Usage
 2. Follow on-screen prompts for CRUD operations.
 
 ==================================================
+
+Loom
+To access the Loom video use the following link-
+https://www.loom.com/share/6a47ebb8df7c4693b547b3b4b5a71a0c
+
+==================================================
