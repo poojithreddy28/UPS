@@ -3,6 +3,61 @@ from db import execute_query, check_record_existance
 import re
 import datetime
 
+
+
+def manage_basic_crud_operations(conn):
+    """
+    Handles basic CRUD operations for various entities like Users, Customers, etc.
+    """
+    while True:
+        print("\n" + "=" * 50)
+        print(f"\033[1m🗂️ BASIC CRUD OPERATIONS MENU 🗂️\033[0m".center(50))
+        print("Choose an entity to manage.".center(50))
+        print("=" * 50)
+        print("1. 🧑 Manage Users")
+        print("2. 👥 Manage Customers")
+        print("3. 🚚 Manage Shipments")
+        print("4. 📦 Manage Packages")
+        print("5. 💳 Manage Payments")
+        print("6. 🏠 Manage Addresses")
+        print("7. 🕵️‍♂️ Manage Delivery Attempts")
+        print("8. 📏 Manage Package Dimensions")
+        print("9. 📄 Manage Package Status")
+        print("10. 📋 Manage Pickup Requests")
+        print("11. 🔒 Manage User Roles")
+        print("12. 🔙 Return to Main Menu")
+        print("=" * 50)
+
+        choice = input("👉 Select an entity to manage (1-12): ").strip()
+
+        if choice == "1":
+            manage_users(conn)  # Manage user records
+        elif choice == "2":
+            manage_customers(conn)  # Manage customer records
+        elif choice == "3":
+            manage_shipments(conn)  # Manage shipment records
+        elif choice == "4":
+            manage_packages(conn)  # Manage package records
+        elif choice == "5":
+            manage_payments(conn)  # Manage payment records
+        elif choice == "6":
+            manage_addresses(conn)  # Manage address records
+        elif choice == "7":
+            manage_delivery_attempts(conn)  # Manage delivery attempt records
+        elif choice == "8":
+            manage_package_dimension(conn)  # Manage package dimensions records
+        elif choice == "9":
+            manage_package_status(conn)  # Manage package status records
+        elif choice == "10":
+            manage_pickup_requests(conn)  # Manage pickup request records
+        elif choice == "11":
+            manage_user_role(conn)  # Manage user role records
+        elif choice == "12":
+            print("🔙 Returning to Main Menu")
+            break
+        else:
+            print("⚠️ Invalid option, please choose again.")
+
 # Helper functions
 def validate_email(email):
     """Validate email format using regex"""

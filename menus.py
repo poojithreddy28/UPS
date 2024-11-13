@@ -7,22 +7,13 @@ def table_list():
     print("Efficiently manage your users, customers, shipments, packages, and payments.".center(50))
     print("Seamlessly handle your logistics with our intuitive interface.".center(50))
     print("=" * 50)
-    print("\n\033[1m🗂️ AVAILABLE TABLES TO MANAGE\033[0m".center(50))
+    print("\n\033[1m🗂️ MAIN MENU\033[0m".center(50))
     print("-" * 50)
-    print("1.  🧑 Manage Users")
-    print("2.  👥 Manage Customers")
-    print("3.  🚚 Manage Shipments")
-    print("4.  📦 Manage Packages")
-    print("5.  💳 Manage Payments")
-    print("6.  🏠 Manage Addresses")
-    print("7.  🕵️‍♂️ Manage Delivery Attempts")
-    print("8.  📏 Manage Package Dimensions")
-    print("9.  📄 Manage Package Status")
-    print("10. 📋 Manage Pickup Requests")
-    print("11. 🔒 Manage User Roles")
-    print("12. ❌ Exit Application")
+    print("1. 🗂️ Basic CRUD Operations")  # New section for CRUD operations
+    print("2. 📊 Manage Complex SQL Queries")  # New section for complex SQL queries
+    print("3. ❌ Exit Application")
     print("=" * 50)
-    return input("👉 Select a Table to Manage (1-12): ").strip()
+    return input("👉 Select an option (1-3): ").strip()
 
 
 def crud_operation_menu(entity_name):
