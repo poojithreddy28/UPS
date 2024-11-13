@@ -237,6 +237,170 @@ def olap_customer_shipment_volume(conn):
         print(f"❌ Error retrieving customer shipment volume. Ensure database connectivity and data accuracy: {e}")
     finally:
         conn.commit()
+def window_functions_menu():
+    """
+    Display the menu for selecting specific window function queries with clear descriptions.
+    """
+    print("\n" + "=" * 50)
+    print(f"\033[1m🪟 WINDOW FUNCTIONS MENU 🪟\033[0m".center(50))
+    print("Select a window function query to view insights:".center(50))
+    print("=" * 50)
+    print("1. First and Last Shipment Dates per User")
+    print("   ➤ Shows each user's earliest and latest shipment dates to track activity.")
+    print("2. Rank Users by Number of Shipments Handled")
+    print("   ➤ Ranks users based on the total shipments handled, identifying top contributors.")
+    print("3. Percentile Rank of Customers by Shipment Volume")
+    print("   ➤ Calculates percentile ranking of customers by their total shipments.")
+    print("4. 4-Month Moving Average of Payment Totals")
+    print("   ➤ Computes the 4-month moving average of monthly payments, useful for trend analysis.")
+    print("5. 🔙 Return to Complex Queries Menu")
+    print("   ➤ Go back to the main complex queries menu.")
+    print("=" * 50)
+    return input("👉 Select a Window Function Query to Run (1-5): ").strip()
 
-# Placeholder for additional functions like manage_window_functions, manage_set_operations, etc.
-# Each function should contain similar error handling, user interaction, and feedback messages.
+def manage_window_functions(conn):
+    """
+    Handle window function query selection and execution with robust error handling.
+    """
+    while True:
+        choice = window_functions_menu()
+        
+        if choice == "1":
+            window_first_last_shipment_dates(conn)
+        elif choice == "2":
+            window_rank_users_by_shipments(conn)
+        elif choice == "3":
+            window_percentile_customer_shipments(conn)
+        elif choice == "4":
+            window_moving_average_payments(conn)
+        elif choice == "5":
+            print("🔙 Returning to Complex Queries Menu.")
+            break
+        else:
+            print("⚠️ Invalid choice. Please select a valid option from 1 to 5.")
+
+def window_first_last_shipment_dates(conn):
+    """
+    Query to find the earliest and latest shipment dates per user using ROW_NUMBER().
+    """
+    print("\nRunning Window Function Query: First and Last Shipment Dates per User\n")
+    
+    query = """
+    WITH UserShipments AS (
+        SELECT u.user_id, u.first_name, u.last_name, s.shipment_date,
+               ROW_NUMBER() OVER (PARTITION BY u.user_id ORDER BY s.shipment_date ASC) AS first_shipment_rank,
+               ROW_NUMBER() OVER (PARTITION BY u.user_id ORDER BY s.shipment_date DESC) AS last_shipment_rank
+        FROM Users u
+        JOIN Shipments s ON u.user_id = s.user_id
+    )
+    SELECT user_id, first_name, last_name,
+           MIN(CASE WHEN first_shipment_rank = 1 THEN shipment_date END) AS earliest_shipment_date,
+           MAX(CASE WHEN last_shipment_rank = 1 THEN shipment_date END) AS latest_shipment_date
+    FROM UserShipments
+    GROUP BY user_id, first_name, last_name
+    ORDER BY user_id;
+    """
+    
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                headers = ["User ID", "First Name", "Last Name", "Earliest Shipment Date", "Latest Shipment Date"]
+                format_records(headers, results)
+            else:
+                print("⚠️ No shipment data found for users.")
+    except Exception as e:
+        print(f"❌ Error retrieving first and last shipment dates: {e}")
+    finally:
+        conn.commit()
+
+def window_rank_users_by_shipments(conn):
+    """
+    Query to rank users by the total number of shipments handled using RANK().
+    """
+    print("\nRunning Window Function Query: Rank Users by Shipments Handled\n")
+    
+    query = """
+    SELECT u.user_id, COUNT(s.shipment_id) AS TotalShipments,
+           RANK() OVER (ORDER BY COUNT(s.shipment_id) DESC) AS UserRank
+    FROM Users u
+    JOIN Shipments s ON u.user_id = s.user_id
+    GROUP BY u.user_id;
+    """
+    
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                headers = ["User ID", "Total Shipments", "Rank"]
+                format_records(headers, results)
+            else:
+                print("⚠️ No shipment data available for ranking users.")
+    except Exception as e:
+        print(f"❌ Error ranking users by shipments: {e}")
+    finally:
+        conn.commit()
+
+def window_percentile_customer_shipments(conn):
+    """
+    Query to calculate percentile rank of customers by shipment volume using PERCENT_RANK().
+    """
+    print("\nRunning Window Function Query: Percentile Rank of Customers by Shipment Volume\n")
+    
+    query = """
+    WITH CustomerShipmentVolume AS (
+        SELECT customer_id, COUNT(shipment_id) AS TotalShipments
+        FROM Shipments
+        GROUP BY customer_id
+    )
+    SELECT customer_id, TotalShipments,
+           ROUND(PERCENT_RANK() OVER (ORDER BY TotalShipments DESC), 2) AS ShipmentPercentile
+    FROM CustomerShipmentVolume
+    ORDER BY ShipmentPercentile;
+    """
+    
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                headers = ["Customer ID", "Total Shipments", "Percentile"]
+                format_records(headers, results)
+            else:
+                print("⚠️ No shipment data found for customers.")
+    except Exception as e:
+        print(f"❌ Error calculating shipment percentiles: {e}")
+    finally:
+        conn.commit()
+
+def window_moving_average_payments(conn):
+    """
+    Calculate the 4-month moving average of the total payment amounts made each month.
+    """
+    print("\nRunning Window Function Query: 4-Month Moving Average of Payment Totals\n")
+
+    query = """
+    SELECT MonthYear,
+           AVG(TotalPayments) OVER (ORDER BY MonthYear ROWS BETWEEN 3 PRECEDING AND CURRENT ROW) AS MovingAvgPayments
+    FROM (
+        SELECT DATE_FORMAT(payment_date, '%Y-%m') AS MonthYear, SUM(amount) AS TotalPayments
+        FROM Payments
+        GROUP BY MonthYear
+    ) AS MonthlyPaymentTotals;
+    """
+    
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                headers = ["Month-Year", "4-Month Moving Avg Payments"]
+                format_records(headers, results)
+            else:
+                print("⚠️ No payment data found for moving average calculation.")
+    except Exception as e:
+        print(f"❌ Error calculating 4-month moving average: {e}")
+    finally:
+        conn.commit()
