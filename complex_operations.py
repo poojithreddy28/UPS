@@ -404,3 +404,182 @@ def window_moving_average_payments(conn):
         print(f"❌ Error calculating 4-month moving average: {e}")
     finally:
         conn.commit()
+def manage_set_operations(conn):
+    """
+    Menu for selecting specific set operation queries.
+    Includes clear menu layout, descriptive use cases, and robust error handling for each operation.
+    """
+    while True:
+        print("\n" + "=" * 50)
+        print(f"\033[1m🔀 SET OPERATIONS MENU 🔀\033[0m".center(50))
+        print("Select a set operation to run:".center(50))
+        print("=" * 50)
+        print("1. Union: Combine Distinct Cities from Pickup and Delivery Locations")
+        print("2. Intersection: Customers with Both 'Pending' and 'Delivered' Shipments")
+        print("3. Difference: Customers Who Made Payments But Never Placed Pickup Requests")
+        print("4. 🔙 Return to Complex Queries Menu")
+        print("=" * 50)
+        
+        choice = input("👉 Select a Set Operation to Run (1-4): ").strip()
+
+        if choice == "1":
+            set_union_cities(conn)
+        elif choice == "2":
+            set_intersection_pending_delivered_customers(conn)
+        elif choice == "3":
+            set_difference_payment_no_pickup(conn)
+        elif choice == "4":
+            print("🔙 Returning to Complex Queries Menu.")
+            break
+        else:
+            print("⚠️ Invalid choice. Please select a valid option from 1 to 4.")
+
+# Set Operation 1: UNION - Combine Distinct Cities from Pickup and Delivery Locations
+def set_union_cities(conn):
+    """
+    Combines all distinct cities from Pickup Requests and Shipments tables.
+    Useful for understanding the geographical coverage of the UPS system.
+    """
+    print("\nRunning Set Operation: Union of Cities from Pickup and Delivery Locations\n")
+    
+    query = """
+    -- Combine distinct cities from Pickup and Delivery locations
+    SELECT DISTINCT addr.City AS City 
+    FROM Pickup_Requests pr
+    JOIN Addresses addr ON pr.customer_id = addr.customer_id
+    UNION
+    SELECT DISTINCT addr.City AS City
+    FROM Shipments sh
+    JOIN Addresses addr ON sh.customer_id = addr.customer_id;
+    """
+    
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                headers = ["City"]
+                format_records(headers, results)
+            else:
+                print("⚠️ No city data found in Pickup or Delivery records.")
+    except Exception as e:
+        print(f"❌ Error performing UNION operation on cities: {e}")
+    finally:
+        conn.commit()
+
+# Set Operation 2: INTERSECT - Customers with Both 'Pending' and 'Delivered' Shipments
+def set_intersection_pending_delivered_customers(conn):
+    """
+    Finds customers who have both 'Pending' and 'Delivered' shipments.
+    Useful for analyzing customers with diverse shipment statuses.
+    """
+    print("\nRunning Set Operation: Intersection of Customers with 'Pending' and 'Delivered' Shipments\n")
+    
+    query = """
+    -- Find customers with both 'Pending' and 'Delivered' shipments
+    SELECT DISTINCT s.customer_id
+    FROM Shipments s
+    WHERE s.shipment_status = 'Pending'
+    INTERSECT
+    SELECT DISTINCT s.customer_id
+    FROM Shipments s
+    WHERE s.shipment_status = 'Delivered';
+    """
+    
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                headers = ["Customer ID"]
+                format_records(headers, results)
+            else:
+                print("⚠️ No customers found with both 'Pending' and 'Delivered' shipments.")
+    except Exception as e:
+        print(f"❌ Error performing INTERSECT operation on customers: {e}")
+    finally:
+        conn.commit()
+
+# Set Operation 3: EXCEPT - Customers Who Made Payments But Never Placed Pickup Requests
+def set_difference_payment_no_pickup(conn):
+    """
+    Identifies customers who made payments but have not placed any pickup requests.
+    Useful for identifying paying customers without associated service usage.
+    """
+    print("\nRunning Set Operation: Difference - Customers with Payments But No Pickup Requests\n")
+    
+    query = """
+    -- Find customers who made payments but have not placed pickup requests
+    SELECT DISTINCT p.customer_id
+    FROM Payments p
+    EXCEPT
+    SELECT DISTINCT pr.customer_id
+    FROM Pickup_Requests pr;
+    """
+    
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                headers = ["Customer ID"]
+                format_records(headers, results)
+            else:
+                print("⚠️ No customers found with payments but no pickup requests.")
+    except Exception as e:
+        print(f"❌ Error performing EXCEPT operation on customers: {e}")
+    finally:
+        conn.commit()
+
+# Utility Function for Formatting Records
+def format_records(headers, rows):
+    """
+    Formats and displays records in a well-aligned table format.
+    :param headers: List of column headers
+    :param rows: List of tuples containing row data
+    """
+    # Determine the width for each column based on the maximum data length
+    col_widths = [max(len(str(item)) for item in col) for col in zip(headers, *rows)]
+    
+    # Create a format string for each row
+    row_format = " | ".join(f"{{:<{width}}}" for width in col_widths)
+    
+    # Print the header
+    print("\n" + "=" * (sum(col_widths) + 3 * (len(headers) - 1)))
+    print(row_format.format(*headers))
+    print("-" * (sum(col_widths) + 3 * (len(headers) - 1)))
+    
+    # Print each row with formatted columns
+    for row in rows:
+        print(row_format.format(*row))
+    
+    # Print the footer
+    print("=" * (sum(col_widths) + 3 * (len(headers) - 1)))
+    
+def manage_set_membership_queries(conn):
+    """
+    Placeholder function for managing set membership queries.
+    This function will allow querying based on set membership operations.
+    """
+    print("\n🚧 Set Membership Queries feature is under construction. Please check back later.")
+
+def manage_set_comparison_queries(conn):
+    """
+    Placeholder function for managing set comparison queries.
+    This function will be implemented to allow comparisons between sets.
+    """
+    print("\n🚧 Set Comparison Queries feature is under construction. Please check back later.")
+
+def manage_advanced_aggregate_functions(conn):
+    """
+    Placeholder function for managing advanced aggregate functions.
+    This will enable usage of complex aggregations like statistical calculations.
+    """
+    print("\n🚧 Advanced Aggregate Functions feature is under construction. Please check back later.")
+
+def manage_with_clause_subqueries(conn):
+    """
+    Placeholder function for managing subqueries using the WITH clause.
+    This feature will support using WITH for reusable subquery definitions.
+    """
+    print("\n🚧 Subqueries Using WITH Clause feature is under construction. Please check back later.")
