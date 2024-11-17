@@ -558,17 +558,289 @@ def format_records(headers, rows):
     
 def manage_set_membership_queries(conn):
     """
-    Placeholder function for managing set membership queries.
-    This function will allow querying based on set membership operations.
+    Handle set membership queries for UPS database management.
+    Provides options to query based on membership operations.
     """
-    print("\n🚧 Set Membership Queries feature is under construction. Please check back later.")
+    while True:
+        print("\n" + "=" * 50)
+        print(f"\033[1m📋 SET MEMBERSHIP QUERIES MENU 📋\033[0m".center(50))
+        print("Explore membership queries to gain insights into UPS data:".center(50))
+        print("=" * 50)
+        print("1. Customers with 'Pending' Pickup Requests")
+        print("2. Customers with No Shipments")
+        print("3. Packages Assigned to Specific Shipments")
+        print("4. 🔙 Return to Complex Queries Menu")
+        print("=" * 50)
+
+        choice = input("👉 Select a Set Membership Query to Run (1-4): ").strip()
+
+        if choice == "1":
+            customers_with_pending_pickups(conn)
+        elif choice == "2":
+            customers_with_no_shipments(conn)
+        elif choice == "3":
+            packages_in_specific_shipments(conn)
+        elif choice == "4":
+            print("🔙 Returning to Complex Queries Menu.")
+            break
+        else:
+            print("⚠️ Invalid choice. Please select a valid option from 1 to 4.")
+
+def customers_with_pending_pickups(conn):
+    """
+    Query customers with at least one 'Pending' pickup request.
+    """
+    print("\nRunning Set Membership Query: Customers with 'Pending' Pickup Requests\n")
+    
+    query = """
+    SELECT DISTINCT pr.customer_id, c.first_name, c.last_name
+    FROM Pickup_Requests pr
+    JOIN Customers c ON pr.customer_id = c.customer_id
+    WHERE pr.pickup_status = 'Pending';
+    """
+    
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                headers = ["Customer ID", "First Name", "Last Name"]
+                col_widths = [max(len(str(item)) for item in col) for col in zip(headers, *results)]
+                row_format = " | ".join(f"{{:<{width}}}" for width in col_widths)
+                
+                print("\n" + "=" * (sum(col_widths) + 3 * (len(headers) - 1)))
+                print(row_format.format(*headers))
+                print("-" * (sum(col_widths) + 3 * (len(headers) - 1)))
+                
+                for row in results:
+                    print(row_format.format(*row))
+                
+                print("=" * (sum(col_widths) + 3 * (len(headers) - 1)))
+            else:
+                print("⚠️ No customers with pending pickup requests.")
+    except Exception as e:
+        print(f"❌ Error retrieving customers with pending pickups: {e}")
+    finally:
+        conn.commit()
+
+def customers_with_no_shipments(conn):
+    """
+    Query customers who have no recorded shipments.
+    """
+    print("\nRunning Set Membership Query: Customers with No Shipments\n")
+    
+    query = """
+    SELECT DISTINCT c.customer_id, c.first_name, c.last_name
+    FROM Customers c
+    WHERE c.customer_id NOT IN (
+        SELECT DISTINCT s.customer_id
+        FROM Shipments s
+    );
+    """
+    
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                headers = ["Customer ID", "First Name", "Last Name"]
+                col_widths = [max(len(str(item)) for item in col) for col in zip(headers, *results)]
+                row_format = " | ".join(f"{{:<{width}}}" for width in col_widths)
+                
+                print("\n" + "=" * (sum(col_widths) + 3 * (len(headers) - 1)))
+                print(row_format.format(*headers))
+                print("-" * (sum(col_widths) + 3 * (len(headers) - 1)))
+                
+                for row in results:
+                    print(row_format.format(*row))
+                
+                print("=" * (sum(col_widths) + 3 * (len(headers) - 1)))
+            else:
+                print("⚠️ All customers have shipments.")
+    except Exception as e:
+        print(f"❌ Error retrieving customers with no shipments: {e}")
+    finally:
+        conn.commit()
+
+def packages_in_specific_shipments(conn):
+    """
+    Query packages assigned to specific shipments.
+    """
+    print("\nRunning Set Membership Query: Packages Assigned to Specific Shipments\n")
+    
+    shipment_ids = input("Enter comma-separated Shipment IDs: ").strip()
+    query = f"""
+    SELECT p.package_id, p.contents_description, p.weight
+    FROM Packages p
+    WHERE p.shipment_id IN ({shipment_ids});
+    """
+    
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                headers = ["Package ID", "Description", "Weight (kg)"]
+                col_widths = [max(len(str(item)) for item in col) for col in zip(headers, *results)]
+                row_format = " | ".join(f"{{:<{width}}}" for width in col_widths)
+                
+                print("\n" + "=" * (sum(col_widths) + 3 * (len(headers) - 1)))
+                print(row_format.format(*headers))
+                print("-" * (sum(col_widths) + 3 * (len(headers) - 1)))
+                
+                for row in results:
+                    print(row_format.format(*row))
+                
+                print("=" * (sum(col_widths) + 3 * (len(headers) - 1)))
+            else:
+                print("⚠️ No packages found for the specified shipments.")
+    except Exception as e:
+        print(f"❌ Error retrieving packages for specific shipments: {e}")
+    finally:
+        conn.commit()
+
+
 
 def manage_set_comparison_queries(conn):
     """
-    Placeholder function for managing set comparison queries.
-    This function will be implemented to allow comparisons between sets.
+    Handle set comparison queries for UPS database management.
+    Provides options to compare datasets based on specific criteria.
     """
-    print("\n🚧 Set Comparison Queries feature is under construction. Please check back later.")
+    while True:
+        print("\n" + "=" * 50)
+        print(f"\033[1m🆚 SET COMPARISON QUERIES MENU 🆚\033[0m".center(50))
+        print("Compare datasets to gain insights into UPS operations:".center(50))
+        print("=" * 50)
+        print("1. Customers with Pickup and Delivery Records")
+        print("2. Packages with Consignment and Delivery Information")
+        print("3. Users Associated with Multiple Shipments")
+        print("4. 🔙 Return to Complex Queries Menu")
+        print("=" * 50)
+
+        choice = input("👉 Select a Set Comparison Query to Run (1-4): ").strip()
+
+        if choice == "1":
+            customers_with_pickup_and_delivery(conn)
+        elif choice == "2":
+            packages_with_consignment_delivery_info(conn)
+        elif choice == "3":
+            users_with_multiple_shipments(conn)
+        elif choice == "4":
+            print("🔙 Returning to Complex Queries Menu.")
+            break
+        else:
+            print("⚠️ Invalid choice. Please select a valid option from 1 to 4.")
+
+def customers_with_pickup_and_delivery(conn):
+    """
+    Query customers with both pickup and delivery records.
+    """
+    print("\nRunning Set Comparison Query: Customers with Pickup and Delivery Records\n")
+    
+    query = """
+    SELECT DISTINCT pr.customer_id, c.first_name, c.last_name
+    FROM Pickup_Requests pr
+    JOIN Shipments s ON pr.customer_id = s.customer_id
+    JOIN Customers c ON pr.customer_id = c.customer_id;
+    """
+    
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                headers = ["Customer ID", "First Name", "Last Name"]
+                col_widths = [max(len(str(item)) for item in col) for col in zip(headers, *results)]
+                row_format = " | ".join(f"{{:<{width}}}" for width in col_widths)
+                
+                print("\n" + "=" * (sum(col_widths) + 3 * (len(headers) - 1)))
+                print(row_format.format(*headers))
+                print("-" * (sum(col_widths) + 3 * (len(headers) - 1)))
+                
+                for row in results:
+                    print(row_format.format(*row))
+                
+                print("=" * (sum(col_widths) + 3 * (len(headers) - 1)))
+            else:
+                print("⚠️ No customers found with both pickup and delivery records.")
+    except Exception as e:
+        print(f"❌ Error retrieving customers with pickup and delivery records: {e}")
+    finally:
+        conn.commit()
+
+def packages_with_consignment_delivery_info(conn):
+    """
+    Query packages with both consignment and delivery information.
+    """
+    print("\nRunning Set Comparison Query: Packages with Consignment and Delivery Information\n")
+    
+    query = """
+    SELECT DISTINCT p.package_id, p.contents_description, p.weight, ps.status_type
+    FROM Packages p
+    JOIN PackageStatus ps ON p.package_id = ps.package_id;
+    """
+    
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                headers = ["Package ID", "Description", "Weight (kg)", "Status Type"]
+                col_widths = [max(len(str(item)) for item in col) for col in zip(headers, *results)]
+                row_format = " | ".join(f"{{:<{width}}}" for width in col_widths)
+                
+                print("\n" + "=" * (sum(col_widths) + 3 * (len(headers) - 1)))
+                print(row_format.format(*headers))
+                print("-" * (sum(col_widths) + 3 * (len(headers) - 1)))
+                
+                for row in results:
+                    print(row_format.format(*row))
+                
+                print("=" * (sum(col_widths) + 3 * (len(headers) - 1)))
+            else:
+                print("⚠️ No packages with consignment and delivery information.")
+    except Exception as e:
+        print(f"❌ Error retrieving packages with consignment and delivery information: {e}")
+    finally:
+        conn.commit()
+
+def users_with_multiple_shipments(conn):
+    """
+    Query users associated with multiple shipments.
+    """
+    print("\nRunning Set Comparison Query: Users Associated with Multiple Shipments\n")
+    
+    query = """
+    SELECT u.user_id, u.first_name, u.last_name, COUNT(s.shipment_id) AS ShipmentCount
+    FROM Users u
+    JOIN Shipments s ON u.user_id = s.user_id
+    GROUP BY u.user_id
+    HAVING COUNT(s.shipment_id) > 1;
+    """
+    
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                headers = ["User ID", "First Name", "Last Name", "Number of Shipments"]
+                col_widths = [max(len(str(item)) for item in col) for col in zip(headers, *results)]
+                row_format = " | ".join(f"{{:<{width}}}" for width in col_widths)
+                
+                print("\n" + "=" * (sum(col_widths) + 3 * (len(headers) - 1)))
+                print(row_format.format(*headers))
+                print("-" * (sum(col_widths) + 3 * (len(headers) - 1)))
+                
+                for row in results:
+                    print(row_format.format(*row))
+                
+                print("=" * (sum(col_widths) + 3 * (len(headers) - 1)))
+            else:
+                print("⚠️ No users found with multiple shipments.")
+    except Exception as e:
+        print(f"❌ Error retrieving users with multiple shipments: {e}")
+    finally:
+        conn.commit()
 
 def manage_advanced_aggregate_functions(conn):
     """
