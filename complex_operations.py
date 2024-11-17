@@ -915,38 +915,40 @@ def examine_payment_trends(conn):
             COUNT(*) AS payment_count
         FROM Payments
         GROUP BY DATE_FORMAT(payment_date, '%Y-%m')
-    ),
-    PaymentTrends AS (
-        SELECT 
-            payment_month,
-            total_amount,
-            payment_count,
-            LAG(total_amount) OVER (ORDER BY payment_month) AS prev_month_amount,
-            LAG(payment_count) OVER (ORDER BY payment_month) AS prev_month_count
-        FROM MonthlyPayments
     )
     SELECT 
         payment_month,
         total_amount,
         payment_count,
-        ROUND((total_amount - prev_month_amount) / prev_month_amount * 100, 2) AS amount_growth_percentage,
-        ROUND((payment_count - prev_month_count) / prev_month_count * 100, 2) AS count_growth_percentage
-    FROM PaymentTrends
+        AVG(total_amount) OVER (ORDER BY payment_month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS moving_avg
+    FROM MonthlyPayments
     ORDER BY payment_month DESC
     LIMIT 12;
     """
+    
     try:
         with conn.cursor() as cursor:
             cursor.execute(query)
             results = cursor.fetchall()
             if results:
                 print("\nPayment Trends (Last 12 Months):")
-                headers = ["Month", "Total Amount", "Payment Count", "Amount Growth (%)", "Count Growth (%)"]
-                format_records(headers, results)
+                headers = ["Month", "Total Amount", "Payment Count", "3-Month Avg"]
+                formatted_results = [
+                    (
+                        row[0],
+                        f"${row[1]:.2f}" if row[1] is not None else "N/A",
+                        str(row[2]) if row[2] is not None else "N/A",
+                        f"${row[3]:.2f}" if row[3] is not None else "N/A"
+                    )
+                    for row in results
+                ]
+                format_records(headers, formatted_results)
             else:
-                print("No data available for payment trends analysis.")
+                print("No payment trend data available.")
     except Exception as e:
         print(f"Error examining payment trends: {e}")
+    finally:
+        conn.commit()
 
 def analyze_pickup_request_patterns(conn):
     print("\nAnalyzing Pickup Request Patterns...")
