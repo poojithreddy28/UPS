@@ -575,11 +575,426 @@ def manage_advanced_aggregate_functions(conn):
     Placeholder function for managing advanced aggregate functions.
     This will enable usage of complex aggregations like statistical calculations.
     """
-    print("\n🚧 Advanced Aggregate Functions feature is under construction. Please check back later.")
+    while True:
+        print("\n" + "=" * 50)
+        print(f"\033[1m📊 ADVANCED AGGREGATE FUNCTIONS MENU 📊\033[0m".center(50))
+        print("Select an advanced aggregation query:".center(50))
+        print("=" * 50)
+        print("1. Calculate Percentiles of Shipment Weights")
+        print("2. Compute Moving Average of Daily Shipment Volumes")
+        print("3. Determine Median Payment Amount per Customer")
+        print("4. Analyze Shipment Frequency Distribution")
+        print("5. Calculate Correlation: Package Dimensions vs Shipping Cost")
+        print("6. 🔙 Return to Complex Queries Menu")
+        print("=" * 50)
+        
+        choice = input("👉 Select an option (1-6): ").strip()
+        
+        if choice == "1":
+            calculate_shipment_weight_percentiles(conn)
+        elif choice == "2":
+            compute_moving_average_shipments(conn)
+        elif choice == "3":
+            determine_median_payment(conn)
+        elif choice == "4":
+            analyze_shipment_frequency(conn)
+        elif choice == "5":
+            print("🔙 Returning to Complex Queries Menu.")
+            break
+        else:
+            print("⚠️ Invalid choice. Please select a valid option from 1 to 6.")
+
+
+def calculate_shipment_weight_percentiles(conn):
+    print("\nCalculating Percentiles of Shipment Weights...")
+    query = """
+    WITH WeightRanks AS (
+        SELECT weight, PERCENT_RANK() OVER (ORDER BY weight) AS percentile
+        FROM Packages
+    )
+    SELECT 
+        ROUND(MIN(CASE WHEN percentile >= 0.25 THEN weight END), 2) AS '25th_Percentile',
+        ROUND(MIN(CASE WHEN percentile >= 0.50 THEN weight END), 2) AS '50th_Percentile',
+        ROUND(MIN(CASE WHEN percentile >= 0.75 THEN weight END), 2) AS '75th_Percentile',
+        ROUND(MIN(CASE WHEN percentile >= 0.90 THEN weight END), 2) AS '90th_Percentile'
+    FROM WeightRanks;
+    """
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            result = cursor.fetchone()
+            if result:
+                print("\nShipment Weight Percentiles:")
+                print(f"25th Percentile: {result[0]} kg")
+                print(f"50th Percentile (Median): {result[1]} kg")
+                print(f"75th Percentile: {result[2]} kg")
+                print(f"90th Percentile: {result[3]} kg")
+            else:
+                print("No data available for shipment weight percentiles.")
+    except Exception as e:
+        print(f"Error calculating shipment weight percentiles: {e}")
+
+def compute_moving_average_shipments(conn):
+    print("\nComputing 7-Day Moving Average of Daily Shipment Volumes...")
+    query = """
+    WITH DailyShipments AS (
+        SELECT DATE(shipment_date) AS ship_date, COUNT(*) AS daily_count
+        FROM Shipments
+        GROUP BY DATE(shipment_date)
+    )
+    SELECT 
+        ship_date,
+        daily_count,
+        AVG(daily_count) OVER (
+            ORDER BY ship_date
+            ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+        ) AS moving_average
+    FROM DailyShipments
+    ORDER BY ship_date DESC
+    LIMIT 30;
+    """
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                print("\nLast 30 days of 7-Day Moving Average of Shipment Volumes:")
+                print("Date".ljust(15) + "Daily Count".ljust(15) + "Moving Average")
+                print("-" * 45)
+                for row in results:
+                    print(f"{row[0].strftime('%Y-%m-%d').ljust(15)}{str(row[1]).ljust(15)}{row[2]:.2f}")
+            else:
+                print("No data available for shipment volume moving average.")
+    except Exception as e:
+        print(f"Error computing moving average of shipments: {e}")
+
+def determine_median_payment(conn):
+    print("\nDetermining Median Payment Amount per Customer...")
+    query = """
+    WITH CustomerPayments AS (
+        SELECT customer_id, amount,
+            ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount) AS row_num,
+            COUNT(*) OVER (PARTITION BY customer_id) AS count
+        FROM Payments
+    )
+    SELECT 
+        customer_id,
+        AVG(amount) AS median_payment
+    FROM CustomerPayments
+    WHERE 
+        row_num IN (FLOOR((count + 1)/2), CEIL((count + 1)/2))
+    GROUP BY customer_id
+    ORDER BY median_payment DESC
+    LIMIT 10;
+    """
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                print("\nTop 10 Customers by Median Payment Amount:")
+                print("Customer ID".ljust(15) + "Median Payment")
+                print("-" * 30)
+                for row in results:
+                    print(f"{str(row[0]).ljust(15)}${row[1]:.2f}")
+            else:
+                print("No data available for median payment calculation.")
+    except Exception as e:
+        print(f"Error determining median payment: {e}")
+
+def analyze_shipment_frequency(conn):
+    print("\nAnalyzing Shipment Frequency Distribution...")
+    query = """
+    WITH CustomerShipments AS (
+        SELECT 
+            customer_id,
+            COUNT(*) AS shipment_count
+        FROM Shipments
+        GROUP BY customer_id
+    )
+    SELECT 
+        CASE 
+            WHEN shipment_count BETWEEN 1 AND 5 THEN '1-5'
+            WHEN shipment_count BETWEEN 6 AND 10 THEN '6-10'
+            WHEN shipment_count BETWEEN 11 AND 20 THEN '11-20'
+            WHEN shipment_count > 20 THEN '20+'
+        END AS shipment_range,
+        COUNT(*) AS customer_count,
+        ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) AS percentage
+    FROM CustomerShipments
+    GROUP BY 
+        CASE 
+            WHEN shipment_count BETWEEN 1 AND 5 THEN '1-5'
+            WHEN shipment_count BETWEEN 6 AND 10 THEN '6-10'
+            WHEN shipment_count BETWEEN 11 AND 20 THEN '11-20'
+            WHEN shipment_count > 20 THEN '20+'
+        END
+    ORDER BY 
+        CASE shipment_range
+            WHEN '1-5' THEN 1
+            WHEN '6-10' THEN 2
+            WHEN '11-20' THEN 3
+            WHEN '20+' THEN 4
+        END;
+    """
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                print("\nShipment Frequency Distribution:")
+                print("Shipment Range".ljust(20) + "Customer Count".ljust(20) + "Percentage")
+                print("-" * 60)
+                for row in results:
+                    print(f"{row[0].ljust(20)}{str(row[1]).ljust(20)}{row[2]}%")
+            else:
+                print("No data available for shipment frequency analysis.")
+    except Exception as e:
+        print(f"Error analyzing shipment frequency: {e}")
 
 def manage_with_clause_subqueries(conn):
     """
     Placeholder function for managing subqueries using the WITH clause.
     This feature will support using WITH for reusable subquery definitions.
     """
-    print("\n🚧 Subqueries Using WITH Clause feature is under construction. Please check back later.")
+    while True:
+        print("\n" + "=" * 50)
+        print(f"\033[1m📊 WITH CLAUSE SUBQUERIES MENU 📊\033[0m".center(50))
+        print("Select a query to run:".center(50))
+        print("=" * 50)
+        print("1. Analyze Customer Shipment Patterns")
+        print("2. Calculate Package Delivery Efficiency")
+        print("3. Identify Top-Performing Delivery Personnel")
+        print("4. Examine Payment Trends Over Time")
+        print("5. Analyze Pickup Request Patterns")
+        print("6. 🔙 Return to Complex Queries Menu")
+        print("=" * 50)
+        
+        choice = input("👉 Select an option (1-6): ").strip()
+        
+        if choice == "1":
+            analyze_customer_shipment_patterns(conn)
+        elif choice == "2":
+            calculate_package_delivery_efficiency(conn)
+        elif choice == "3":
+            identify_top_performing_personnel(conn)
+        elif choice == "4":
+            examine_payment_trends(conn)
+        elif choice == "5":
+            analyze_pickup_request_patterns(conn)
+        elif choice == "6":
+            print("🔙 Returning to Complex Queries Menu.")
+            break
+        else:
+            print("⚠️ Invalid choice. Please select a valid option from 1 to 6.")
+
+def analyze_customer_shipment_patterns(conn):
+    print("\nAnalyzing Customer Shipment Patterns...")
+    query = """
+    WITH CustomerShipments AS (
+        SELECT 
+            c.customer_id,
+            c.first_name,
+            c.last_name,
+            COUNT(s.shipment_id) AS total_shipments,
+            AVG(p.weight) AS avg_package_weight,
+            SUM(CASE WHEN s.shipment_type = 'Express' THEN 1 ELSE 0 END) AS express_shipments
+        FROM Customers c
+        JOIN Shipments s ON c.customer_id = s.customer_id
+        JOIN Packages p ON s.shipment_id = p.shipment_id
+        GROUP BY c.customer_id, c.first_name, c.last_name
+    )
+    SELECT 
+        customer_id,
+        CONCAT(first_name, ' ', last_name) AS customer_name,
+        total_shipments,
+        ROUND(avg_package_weight, 2) AS avg_package_weight,
+        express_shipments,
+        ROUND(express_shipments * 100.0 / total_shipments, 2) AS express_percentage
+    FROM CustomerShipments
+    ORDER BY total_shipments DESC
+    LIMIT 10;
+    """
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                print("\nTop 10 Customers by Shipment Patterns:")
+                headers = ["Customer ID", "Name", "Total Shipments", "Avg Weight (kg)", "Express Shipments", "Express %"]
+                format_records(headers, results)
+            else:
+                print("No data available for customer shipment patterns.")
+    except Exception as e:
+        print(f"Error analyzing customer shipment patterns: {e}")
+
+def calculate_package_delivery_efficiency(conn):
+    print("\nCalculating Package Delivery Efficiency...")
+    query = """
+    WITH DeliveryStats AS (
+        SELECT 
+            s.shipment_id,
+            s.shipment_date,
+            MAX(CASE WHEN da.attempt_status = 'Delivered' THEN da.attempt_date END) AS delivery_date,
+            COUNT(da.attempt_id) AS delivery_attempts
+        FROM Shipments s
+        LEFT JOIN DeliveryAttempts da ON s.shipment_id = da.shipment_id
+        GROUP BY s.shipment_id, s.shipment_date
+    )
+    SELECT 
+        AVG(DATEDIFF(delivery_date, shipment_date)) AS avg_delivery_days,
+        AVG(delivery_attempts) AS avg_delivery_attempts,
+        SUM(CASE WHEN delivery_date IS NOT NULL THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS successful_delivery_percentage
+    FROM DeliveryStats;
+    """
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            result = cursor.fetchone()
+            if result:
+                avg_delivery_days = result[0] if result[0] is not None else "N/A"
+                avg_delivery_attempts = result[1] if result[1] is not None else "N/A"
+                successful_delivery_percentage = result[2] if result[2] is not None else "N/A"
+                
+                print("\nPackage Delivery Efficiency Metrics:")
+                print(f"Average Delivery Time: {avg_delivery_days} days")
+                print(f"Average Delivery Attempts: {avg_delivery_attempts}")
+                print(f"Successful Delivery Percentage: {successful_delivery_percentage}%")
+            else:
+                print("No data available for package delivery efficiency calculation.")
+    except Exception as e:
+        print(f"❌ Error calculating package delivery efficiency: {e}")
+    finally:
+        conn.commit()
+
+def identify_top_performing_personnel(conn):
+    print("\nIdentifying Top-Performing Delivery Personnel...")
+    query = """
+    WITH PersonnelPerformance AS (
+        SELECT 
+            u.user_id,
+            CONCAT(u.first_name, ' ', u.last_name) AS employee_name,
+            COUNT(s.shipment_id) AS total_shipments,
+            AVG(CASE WHEN da.attempt_status = 'Delivered' THEN 1 ELSE 0 END) AS delivery_success_rate,
+            AVG(DATEDIFF(da.attempt_date, s.shipment_date)) AS avg_delivery_time
+        FROM Users u
+        JOIN Shipments s ON u.user_id = s.user_id
+        LEFT JOIN DeliveryAttempts da ON s.shipment_id = da.shipment_id
+        WHERE u.role_id = (SELECT role_id FROM User_Role WHERE role_name = 'Delivery Personnel')
+        GROUP BY u.user_id, u.first_name, u.last_name
+    )
+    SELECT 
+        employee_name,
+        total_shipments,
+        ROUND(delivery_success_rate * 100, 2) AS success_rate_percentage,
+        ROUND(avg_delivery_time, 1) AS avg_delivery_days
+    FROM PersonnelPerformance
+    ORDER BY delivery_success_rate DESC, total_shipments DESC
+    LIMIT 10;
+    """
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                print("\nTop 10 Performing Delivery Personnel:")
+                headers = ["Employee Name", "Total Shipments", "Success Rate (%)", "Avg Delivery Time (days)"]
+                format_records(headers, results)
+            else:
+                print("No data available for delivery personnel performance.")
+    except Exception as e:
+        print(f"Error identifying top-performing personnel: {e}")
+
+def examine_payment_trends(conn):
+    print("\nExamining Payment Trends Over Time...")
+    query = """
+    WITH MonthlyPayments AS (
+        SELECT 
+            DATE_FORMAT(payment_date, '%Y-%m') AS payment_month,
+            SUM(amount) AS total_amount,
+            COUNT(*) AS payment_count
+        FROM Payments
+        GROUP BY DATE_FORMAT(payment_date, '%Y-%m')
+    ),
+    PaymentTrends AS (
+        SELECT 
+            payment_month,
+            total_amount,
+            payment_count,
+            LAG(total_amount) OVER (ORDER BY payment_month) AS prev_month_amount,
+            LAG(payment_count) OVER (ORDER BY payment_month) AS prev_month_count
+        FROM MonthlyPayments
+    )
+    SELECT 
+        payment_month,
+        total_amount,
+        payment_count,
+        ROUND((total_amount - prev_month_amount) / prev_month_amount * 100, 2) AS amount_growth_percentage,
+        ROUND((payment_count - prev_month_count) / prev_month_count * 100, 2) AS count_growth_percentage
+    FROM PaymentTrends
+    ORDER BY payment_month DESC
+    LIMIT 12;
+    """
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                print("\nPayment Trends (Last 12 Months):")
+                headers = ["Month", "Total Amount", "Payment Count", "Amount Growth (%)", "Count Growth (%)"]
+                format_records(headers, results)
+            else:
+                print("No data available for payment trends analysis.")
+    except Exception as e:
+        print(f"Error examining payment trends: {e}")
+
+def analyze_pickup_request_patterns(conn):
+    print("\nAnalyzing Pickup Request Patterns...")
+    query = """
+    WITH PickupStats AS (
+        SELECT 
+            DAYNAME(pickup_date) AS day_of_week,
+            HOUR(pickup_date) AS hour_of_day,
+            COUNT(*) AS request_count
+        FROM Pickup_Requests
+        GROUP BY DAYNAME(pickup_date), HOUR(pickup_date)
+    ),
+    DailyTotals AS (
+        SELECT day_of_week, SUM(request_count) AS total_daily_requests
+        FROM PickupStats
+        GROUP BY day_of_week
+    )
+    SELECT 
+        ps.day_of_week,
+        ps.hour_of_day,
+        ps.request_count,
+        ROUND(ps.request_count * 100.0 / dt.total_daily_requests, 2) AS percentage_of_daily_total
+    FROM PickupStats ps
+    JOIN DailyTotals dt ON ps.day_of_week = dt.day_of_week
+    ORDER BY 
+        FIELD(ps.day_of_week, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'),
+        ps.hour_of_day;
+    """
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            if results:
+                print("\nPickup Request Patterns by Day and Hour:")
+                headers = ["Day of Week", "Hour", "Request Count", "% of Daily Total"]
+                format_records(headers, results)
+            else:
+                print("No data available for pickup request pattern analysis.")
+    except Exception as e:
+        print(f"Error analyzing pickup request patterns: {e}")
+
+def format_records(headers, rows):
+    """Formats and displays records in a well-aligned table format."""
+    col_widths = [max(len(str(item)) for item in col) for col in zip(headers, *rows)]
+    row_format = " | ".join(f"{{:<{width}}}" for width in col_widths)
+    print("\n" + "=" * (sum(col_widths) + 3 * (len(headers) - 1)))
+    print(row_format.format(*headers))
+    print("-" * (sum(col_widths) + 3 * (len(headers) - 1)))
+    for row in rows:
+        print(row_format.format(*row))
+    print("=" * (sum(col_widths) + 3 * (len(headers) - 1)))
