@@ -1,5 +1,6 @@
 # complex_operations.py
 
+# Displays menu for complex SQL query options
 def complex_queries_menu():
     """
     Display the main menu for managing complex SQL queries, offering an interactive and
@@ -20,6 +21,7 @@ def complex_queries_menu():
     print("=" * 50)
     return input("👉 Select a Complex Query to Run (1-8): ").strip()
 
+# Handles selection and execution of complex queries
 def manage_complex_queries(conn):
     """
     Main function to handle complex SQL query selection and execution.
@@ -48,6 +50,7 @@ def manage_complex_queries(conn):
         else:
             print("⚠️ Invalid choice. Please select a valid option from 1 to 8.")
 
+# Shows menu for OLAP query selection
 def olap_queries_menu():
     """
     Display the menu for selecting specific OLAP queries with clear descriptions.
@@ -64,6 +67,7 @@ def olap_queries_menu():
     print("=" * 50)
     return input("👉 Select an OLAP Query to Run (1-5): ").strip()
 
+# Manages OLAP query selection and execution
 def manage_olap_queries(conn):
     """
     Handle OLAP query selection and execution with robust error handling and feedback.
@@ -85,6 +89,7 @@ def manage_olap_queries(conn):
         else:
             print("⚠️ Invalid choice. Please select a valid option from 1 to 5.")
 
+# Formats and displays query results as table
 def format_records(headers, rows):
     """
     Formats and displays records in a well-aligned table format with user-friendly presentation.
@@ -106,6 +111,7 @@ def format_records(headers, rows):
 
 # OLAP Queries and Error Handling
 
+# Calculates percentage distribution of pickup request statuses
 def olap_pickup_request_status_distribution(conn):
     """
     OLAP query to determine the percentage distribution of pickup request statuses.
@@ -138,6 +144,7 @@ def olap_pickup_request_status_distribution(conn):
     finally:
         conn.commit()
 
+# Retrieves payment details with ROLLUP grouping
 def olap_monthly_payments_with_rollup(conn):
     """
     OLAP query to retrieve payment details by year, month, and customer with rollup.
@@ -173,6 +180,7 @@ def olap_monthly_payments_with_rollup(conn):
     finally:
         conn.commit()
 
+# Calculates daily delivery success rates
 def olap_daily_delivery_success_rate(conn):
     """
     Calculates the daily delivery success rate by analyzing delivery attempts.
@@ -205,6 +213,7 @@ def olap_daily_delivery_success_rate(conn):
     finally:
         conn.commit()
 
+# Ranks customers by shipment volume using ROLLUP
 def olap_customer_shipment_volume(conn):
     """
     OLAP query to rank customers by shipment volume using ROLLUP.
@@ -237,6 +246,8 @@ def olap_customer_shipment_volume(conn):
         print(f"❌ Error retrieving customer shipment volume. Ensure database connectivity and data accuracy: {e}")
     finally:
         conn.commit()
+
+# Displays menu for window function queries
 def window_functions_menu():
     """
     Display the menu for selecting specific window function queries with clear descriptions.
@@ -258,6 +269,7 @@ def window_functions_menu():
     print("=" * 50)
     return input("👉 Select a Window Function Query to Run (1-5): ").strip()
 
+# Handles window function query selection and execution
 def manage_window_functions(conn):
     """
     Handle window function query selection and execution with robust error handling.
@@ -279,6 +291,7 @@ def manage_window_functions(conn):
         else:
             print("⚠️ Invalid choice. Please select a valid option from 1 to 5.")
 
+# Finds earliest and latest shipment dates per user
 def window_first_last_shipment_dates(conn):
     """
     Query to find the earliest and latest shipment dates per user using ROW_NUMBER().
@@ -315,6 +328,7 @@ def window_first_last_shipment_dates(conn):
     finally:
         conn.commit()
 
+# Ranks users by total shipments handled
 def window_rank_users_by_shipments(conn):
     """
     Query to rank users by the total number of shipments handled using RANK().
@@ -343,6 +357,7 @@ def window_rank_users_by_shipments(conn):
     finally:
         conn.commit()
 
+# Calculates percentile rank of customers by shipments
 def window_percentile_customer_shipments(conn):
     """
     Query to calculate percentile rank of customers by shipment volume using PERCENT_RANK().
@@ -375,6 +390,7 @@ def window_percentile_customer_shipments(conn):
     finally:
         conn.commit()
 
+# Calculates 4-month moving average of payment totals
 def window_moving_average_payments(conn):
     """
     Calculate the 4-month moving average of the total payment amounts made each month.
@@ -404,6 +420,9 @@ def window_moving_average_payments(conn):
         print(f"❌ Error calculating 4-month moving average: {e}")
     finally:
         conn.commit()
+
+
+# Manages set operation query selection and execution
 def manage_set_operations(conn):
     """
     Menu for selecting specific set operation queries.
@@ -555,7 +574,8 @@ def format_records(headers, rows):
     
     # Print the footer
     print("=" * (sum(col_widths) + 3 * (len(headers) - 1)))
-    
+
+# Handles set membership query selection and execution
 def manage_set_membership_queries(conn):
     """
     Handle set membership queries for UPS database management.
@@ -586,6 +606,7 @@ def manage_set_membership_queries(conn):
         else:
             print("⚠️ Invalid choice. Please select a valid option from 1 to 4.")
 
+# Finds customers with pending pickup requests
 def customers_with_pending_pickups(conn):
     """
     Query customers with at least one 'Pending' pickup request.
@@ -623,6 +644,7 @@ def customers_with_pending_pickups(conn):
     finally:
         conn.commit()
 
+# Identifies customers without any shipments
 def customers_with_no_shipments(conn):
     """
     Query customers who have no recorded shipments.
@@ -662,6 +684,7 @@ def customers_with_no_shipments(conn):
     finally:
         conn.commit()
 
+# Retrieves packages for specified shipment IDs
 def packages_in_specific_shipments(conn):
     """
     Query packages assigned to specific shipments.
@@ -701,6 +724,7 @@ def packages_in_specific_shipments(conn):
 
 
 
+# Manages set comparison query selection and execution
 def manage_set_comparison_queries(conn):
     """
     Handle set comparison queries for UPS database management.
@@ -731,6 +755,7 @@ def manage_set_comparison_queries(conn):
         else:
             print("⚠️ Invalid choice. Please select a valid option from 1 to 4.")
 
+# Finds customers with both pickup and delivery
 def customers_with_pickup_and_delivery(conn):
     """
     Query customers with both pickup and delivery records.
@@ -768,6 +793,7 @@ def customers_with_pickup_and_delivery(conn):
     finally:
         conn.commit()
 
+# Retrieves packages with consignment and delivery information
 def packages_with_consignment_delivery_info(conn):
     """
     Query packages with both consignment and delivery information.
@@ -804,6 +830,7 @@ def packages_with_consignment_delivery_info(conn):
     finally:
         conn.commit()
 
+# Identifies users associated with multiple shipments
 def users_with_multiple_shipments(conn):
     """
     Query users associated with multiple shipments.
@@ -842,6 +869,7 @@ def users_with_multiple_shipments(conn):
     finally:
         conn.commit()
 
+# Manages advanced aggregate function query selection
 def manage_advanced_aggregate_functions(conn):
     """
     Placeholder function for managing advanced aggregate functions.
@@ -856,11 +884,10 @@ def manage_advanced_aggregate_functions(conn):
         print("2. Compute Moving Average of Daily Shipment Volumes")
         print("3. Determine Median Payment Amount per Customer")
         print("4. Analyze Shipment Frequency Distribution")
-        print("5. Calculate Correlation: Package Dimensions vs Shipping Cost")
-        print("6. 🔙 Return to Complex Queries Menu")
+        print("5. 🔙 Return to Complex Queries Menu")
         print("=" * 50)
         
-        choice = input("👉 Select an option (1-6): ").strip()
+        choice = input("👉 Select an option (1-5): ").strip()
         
         if choice == "1":
             calculate_shipment_weight_percentiles(conn)
@@ -877,6 +904,7 @@ def manage_advanced_aggregate_functions(conn):
             print("⚠️ Invalid choice. Please select a valid option from 1 to 6.")
 
 
+# Calculates percentiles of shipment weights
 def calculate_shipment_weight_percentiles(conn):
     print("\nCalculating Percentiles of Shipment Weights...")
     query = """
@@ -906,6 +934,7 @@ def calculate_shipment_weight_percentiles(conn):
     except Exception as e:
         print(f"Error calculating shipment weight percentiles: {e}")
 
+# Computes moving average of daily shipment volumes
 def compute_moving_average_shipments(conn):
     print("\nComputing 7-Day Moving Average of Daily Shipment Volumes...")
     query = """
@@ -940,6 +969,7 @@ def compute_moving_average_shipments(conn):
     except Exception as e:
         print(f"Error computing moving average of shipments: {e}")
 
+# Calculates median payment amount per customer
 def determine_median_payment(conn):
     print("\nDetermining Median Payment Amount per Customer...")
     query = """
@@ -974,6 +1004,7 @@ def determine_median_payment(conn):
     except Exception as e:
         print(f"Error determining median payment: {e}")
 
+# Analyzes distribution of shipment frequencies
 def analyze_shipment_frequency(conn):
     print("\nAnalyzing Shipment Frequency Distribution...")
     query = """
@@ -1024,6 +1055,7 @@ def analyze_shipment_frequency(conn):
     except Exception as e:
         print(f"Error analyzing shipment frequency: {e}")
 
+# Handles subqueries using WITH clause
 def manage_with_clause_subqueries(conn):
     """
     Placeholder function for managing subqueries using the WITH clause.
@@ -1060,6 +1092,7 @@ def manage_with_clause_subqueries(conn):
         else:
             print("⚠️ Invalid choice. Please select a valid option from 1 to 6.")
 
+# Examines customer shipping behaviors and preferences
 def analyze_customer_shipment_patterns(conn):
     print("\nAnalyzing Customer Shipment Patterns...")
     query = """
@@ -1100,6 +1133,7 @@ def analyze_customer_shipment_patterns(conn):
     except Exception as e:
         print(f"Error analyzing customer shipment patterns: {e}")
 
+# Measures efficiency of package delivery process
 def calculate_package_delivery_efficiency(conn):
     print("\nCalculating Package Delivery Efficiency...")
     query = """
@@ -1139,6 +1173,7 @@ def calculate_package_delivery_efficiency(conn):
     finally:
         conn.commit()
 
+# Finds top-performing employees based on metrics
 def identify_top_performing_personnel(conn):
     print("\nIdentifying Top-Performing Delivery Personnel...")
     query = """
@@ -1177,6 +1212,7 @@ def identify_top_performing_personnel(conn):
     except Exception as e:
         print(f"Error identifying top-performing personnel: {e}")
 
+# Analyzes trends in customer payment data
 def examine_payment_trends(conn):
     print("\nExamining Payment Trends Over Time...")
     query = """
@@ -1222,6 +1258,7 @@ def examine_payment_trends(conn):
     finally:
         conn.commit()
 
+# Studies patterns in customer pickup requests
 def analyze_pickup_request_patterns(conn):
     print("\nAnalyzing Pickup Request Patterns...")
     query = """
@@ -1262,6 +1299,7 @@ def analyze_pickup_request_patterns(conn):
     except Exception as e:
         print(f"Error analyzing pickup request patterns: {e}")
 
+# Formats query results into readable table
 def format_records(headers, rows):
     """Formats and displays records in a well-aligned table format."""
     col_widths = [max(len(str(item)) for item in col) for col in zip(headers, *rows)]
