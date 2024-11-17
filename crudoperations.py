@@ -4,7 +4,7 @@ import re
 import datetime
 
 
-
+#Handles CRUD operations for various entities
 def manage_basic_crud_operations(conn):
     """
     Handles basic CRUD operations for various entities like Users, Customers, etc.

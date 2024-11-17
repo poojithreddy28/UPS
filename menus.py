@@ -1,3 +1,4 @@
+# Displays main menu for UPS Management System
 def table_list():
     """
     Display the main menu for the UPS Management System and prompt the user to select an option.
@@ -15,7 +16,7 @@ def table_list():
     print("=" * 50)
     return input("👉 Select an option (1-3): ").strip()
 
-
+# Generates CRUD menu for specific entity
 def crud_operation_menu(entity_name):
     """
     Generate a CRUD operation menu based on the provided entity name and prompt the user to select an action.
@@ -176,6 +177,7 @@ def crud_operation_menu(entity_name):
         print("=" * 50)
         return input("👉 Choose an option (1-5): ").strip()
 
+# Displays styled message for user feedback
 def display_message(msg):
     """
     Display a styled message for the user, typically for confirmations or alerts.
