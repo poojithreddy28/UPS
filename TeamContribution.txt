@@ -9,3 +9,43 @@ Team Contribution -
 +--------------------------+------------+--------------------------+--------------+
 | Soham Mankar             | A20543251  | smankar1@hawk.iit.edu    | 33.33%       |
 +--------------------------+------------+--------------------------+--------------+
+
+Description :-
+
+Poojith Reddy Annachedu - Developed manage_olap_queries method to Manages OLAP query with methods - 
+                            1. olap_pickup_request_status_distribution
+                            2. olap_monthly_payments_with_rollup
+                            3. olap_daily_delivery_success_rate
+                            4. olap_customer_shipment_volume
+                        and developed manage_window_functions method to Handles window function query with methods - 
+                            1. window_first_last_shipment_dates
+                            2. window_rank_users_by_shipments
+                            3. window_percentile_customer_shipments
+                            4. window_moving_average_payments
+                        Also developed Menu Functions for Main Menu.
+
+Atharv Rathore - Developed manage_advanced_aggregate_functions to Manages advanced aggregate function query selection with methods -
+                            1. calculate_shipment_weight_percentiles
+                            2. compute_moving_average_shipments
+                            3. determine_median_payment
+                            4. analyze_shipment_frequency
+                and developed manage_with_clause_subqueries to Handles subqueries using WITH clause and the methods- 
+                            1. analyze_customer_shipment_patterns
+                            2. calculate_package_delivery_efficiency
+                            3. identify_top_performing_personnel
+                            4. examine_payment_trends
+                            5. analyze_pickup_request_patterns
+                also helped developing CURD operation Menu and Advance SQL operation Menu.
+
+Soham Mankar -  Developed manage_set_operations to Manages set operation query selection and execution with methods -
+                            1. set_union_cities
+                            2. set_intersection_pending_delivered_customers
+                            3. set_difference_payment_no_pickup
+                and developed manage_set_membership_queries to Handles set membership query selection and execution with methods - 
+                            1. customers_with_pending_pickups
+                            2. customers_with_no_shipments
+                            3. packages_in_specific_shipments
+                also developed manage_set_comparison_queries to Manages set comparison query selection and execution with methods - 
+                            1. customers_with_pickup_and_delivery
+                            2. packages_with_consignment_delivery_info
+                            3. users_with_multiple_shipments
